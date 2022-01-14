@@ -9,11 +9,9 @@ headingDivider: 1
 
 # Goals of this session
 
-- Overview of the ecosystem
-- Tooling available
 - Understand how esp-idf is used in conjunction Rust
+- Tooling available
 - Flash and run Standard library example on C3
-- Bonus: Talk about Xtensa
 
 # About the hardware
 
@@ -57,15 +55,33 @@ headingDivider: 1
 - `ldproxy` - used to to collect all the linker args from esp-idf and use them in the final link with Rust.
 - **Note**: Does not play well with Windows currently, a few issues with long paths / long command line args. 
 
-# Blinky
+# Example
 
-<!-- TODO prepare demo project with blinky for c3 devkits -->
+- Lets get the built in neopixel flashing
 
-<!-- prerequisites, ie.e tooling, compiler, compiler targets -->
+# Example - Prequisites
 
-# Xtensa
+- `git clone https://github.com/MabezDev/esp32c3-idf-led-example`.
+- `rustup toolchain install nightly` & `rustup update nightly`.
+- `cargo install ldproxy --force`
+- `cargo install cargo-espflash` 
 
-- Prior to the C3 all Espressif chips are Xtensa arch.
+# Example - Build
+
+Inside `esp32c3-idf-led-example`, run:
+```
+  cargo +nightly espflash --monitor $DEVICE_PATH
+```
+Where $DEVICE_PATH is the path to the serial port for the esp32c3.
+
+Examples:
+ - Linux: `/dev/ttyUSB0`
+ - MacOS: `/dev/cu.usbserial-A700dYoR` or `/dev/ttyUSB0`
+ - Windows: `COM1`
+  
+# Bonus - Xtensa
+
+- Prior to the C3 all Espressif chips are based on the Xtensa architecture.
 - ISA is not public, only licensees have access.
   - We made a unofficial ISA doc [available here](https://github.com/espressif/xtensa-isa-doc)
 - LLVM backend developed by Espressif
@@ -75,4 +91,4 @@ headingDivider: 1
 
 - [esp-rs organisation](https://github.com/esp-rs)
 - [esp-idf](https://github.com/espressif/esp-idf)
-
+- [esp-rs roadmap](https://github.com/orgs/esp-rs/projects/1)
