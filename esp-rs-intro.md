@@ -57,7 +57,7 @@ headingDivider: 1
 
 # Example
 
-- Lets get the built in neopixel flashing
+- Lets get the built-in neopixel flashing
 
 # Example - Prequisites
 
