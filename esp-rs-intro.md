@@ -6,6 +6,7 @@ headingDivider: 1
 
 <!-- _class: lead -->
 # esp-rs Introduction
+## Scott Mabin
 
 # Goals of this session
 
@@ -17,22 +18,9 @@ headingDivider: 1
 
 ![esp32c3](assets/esp32-c3-devkitm-1-v1-annotated-photo.png)
 
-# Tooling - espflash
-
-- Rewrite of esptool.py with convenient Cargo integrations.
-- Communication with the ROM bootloader via serial to flash programs.
-- Handles all sorts of esp-idf specifics, partition table, bootloader etc.
-
-# Tooling - probe-rs
-
-- RISC-V & ARM only.
-- USB-SERIAL-JTAG peripheral built into the esp32c3 silicon supported in probe-rs v0.14.
-- Flashing works flawlessly, but probe-rs is not "esp-idf aware".
-- Debugging RISC-V chips with probe-rs is mostly there, but unwinding the stack is buggy. See [this tracking issue](https://github.com/probe-rs/probe-rs/issues/877).
-
 # STD - esp-idf
 
-- A development framework for all Espressif chips since 2016 (esp32 and newer).
+- A development framework for all Espressif chips since 2016 (esp32 and newer) written in C.
 - Handles atomic emulation for targets (esp32c3 included) without atomics.
 - esp-idf tooling is mostly written in Python, but `idf-env`, written in Rust, is rapidly gaining features.
 
@@ -53,7 +41,20 @@ headingDivider: 1
 - `embuild` - manages the build and configuration of the esp-idf project.
 - `-Z build-std` - Using cargo to build the standard library.
 - `ldproxy` - used to to collect all the linker args from esp-idf and use them in the final link with Rust.
-- **Note**: Does not play well with Windows currently, a few issues with long paths / long command line args. 
+- **Note**: Does not play well with Windows currently, a few issues with long paths / long command line args.
+
+# Tooling - espflash
+
+- Rewrite of esptool.py with convenient Cargo integrations.
+- Communication with the ROM bootloader via serial to flash programs.
+- Handles all sorts of esp-idf specifics, partition table, bootloader etc.
+
+# Tooling - probe-rs
+
+- RISC-V & ARM only.
+- USB-SERIAL-JTAG peripheral built into the esp32c3 silicon supported in probe-rs v0.14.
+- Flashing works flawlessly, but probe-rs is not "esp-idf aware".
+- Debugging RISC-V chips with probe-rs is mostly there, but unwinding the stack is buggy. See [this tracking issue](https://github.com/probe-rs/probe-rs/issues/877).
 
 # Example
 
@@ -61,10 +62,10 @@ headingDivider: 1
 
 # Example - Prequisites
 
-- `git clone https://github.com/MabezDev/esp32c3-idf-led-example`.
 - `rustup toolchain install nightly` & `rustup update nightly`.
 - `cargo install ldproxy --force`
-- `cargo install cargo-espflash` 
+- `cargo install cargo-espflash`
+- `git clone https://github.com/MabezDev/esp32c3-idf-led-example`.
 
 # Example - Build
 
@@ -89,6 +90,7 @@ Examples:
 
 # Links
 
-- [esp-rs organisation](https://github.com/esp-rs)
 - [esp-idf](https://github.com/espressif/esp-idf)
+- [The esp book](https://esp-rs.github.io/book/)
+- [esp-rs organisation](https://github.com/esp-rs)
 - [esp-rs roadmap](https://github.com/orgs/esp-rs/projects/1)
