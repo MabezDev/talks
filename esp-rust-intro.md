@@ -93,6 +93,23 @@ use serde;
 # Writing Rust code
 <!-- _class: lead -->
 
+# Mutability
+
+Unlike most programming languages, every variable and reference is immutable by default.
+
+```rust
+let x = 5;
+x = 6; // compile error, x is not mutable 
+```
+
+To declare something should by mutable, use the `mut` keyword.
+
+```rust
+let mut x = 5;
+x = 6;
+// x is now 6
+```
+
 # Ownership
 
 - Fundamental set of rules that governs how a Rust program manages memory.
@@ -135,7 +152,7 @@ error: could not compile `ownership` due to previous error
 
 # Ownership - `Copy` types
 
-The error on the previous slide talks about a type not being `Copy`. Simply put, if an `Struct` or `Enum` is `Copy`, it means it's safe to do a bitwise memcopy to duplicate the value.
+The error on the previous slide talks about a type not being `Copy`. Simply put, if an `struct` or `enum` is `Copy`, it means it's safe to do a bitwise memcopy to duplicate the value.
 
 Example of a `Copy` type are integers.
 
@@ -164,9 +181,83 @@ We can see we have a pointer to some memory (on the heap), and a capacity. If we
 
 # Ownership  - `Clone`
 
-For us to duplicate a `String` we'd need some special behavior. This is where `Clone` comes in. `Clone` is a trait (more on those later!) that allows us to define what to do when we want to duplicate a `Struct` or `Enum`.
+For us to duplicate a `String` we'd need some special behavior. This is where `Clone` comes in. `Clone` is a trait (more on those later!) that allows us to define what to do when we want to duplicate a `struct` or `enum`.
 
 The `Clone` implementation for a `String` allocates _new_ memory on the heap with the same capacity, copies the bytes from the current allocation into the new memory and finally returns the new `String`.
+
+# Ownership - Borrowing
+
+Moving (transfering ownership) everytime doesn't make sense. Sometimes we just want to _borrow_ a value, without any unnecessary `Clone`'s or `Copy`'s.
+
+```rust
+fn main() {
+    let s1 = String::from("hello");
+
+    let len = calculate_length(&s1);
+
+    println!("The length of '{}' is {}.", s1, len);
+}
+
+/// Takes a _reference_ to a `String`
+fn calculate_length(s: &String) -> usize {
+    s.len()
+}
+```
+
+# Ownership - Mutable borrowing
+
+```rust
+fn main() {
+    let mut s = String::from("hello");
+
+    change(&mut s);
+
+    println!("{}", s)
+}
+
+/// Takes a **mutable** _reference_ to a `String`
+/// We can treat this `String` like we _own_ it for the duration of the borrow
+fn change(some_string: &mut String) {
+    some_string.push_str(", world");
+}
+```
+
+# Ownership - Lifetime of a borrow
+
+In most cases, and with the examples on the previous slides the lifetime of the borrows were inferred by the compiler, but this is not always the case.
+
+```rust
+struct SliceContainer {
+  bytes: &[u8] // reference to a slice of bytes
+}
+
+impl SliceContainer {
+  fn print(&self) {
+    println!("{:?}", self.bytes);
+  }
+}
+```
+In this case, what happens at run time if we call `print` when the underlying storage for the bytes has be deallocated?
+
+# Ownership - Lifetime of a borrow
+
+```rust
+struct SliceContainer<'a> { // lifetime of struct denoted as 'a
+  // reference to a slice of bytes, 
+  // which **must** live _atleast_ as long as the lifetime 'a
+  bytes: &'a [u8] 
+}
+
+impl<'a> SliceContainer<'a> {
+  fn print(&self) {
+    println!("{:?}", self.bytes);
+  }
+}
+```
+
+Rust will track the lifetime of any variables used in `SliceContainer` and ensure they live long enough (not dropped before `SliceContainer`'s lifetime `'a`).
+
+The lifetime name is not important, it can be almost anything for example `'bytes`, but typically it is a single letter.
 
 
 # Links
