@@ -237,7 +237,22 @@ impl SliceContainer {
   }
 }
 ```
+
+# Ownership - Lifetime of a borrow
+
 In this case, what happens at run time if we call `print` when the underlying storage for the bytes has be deallocated?
+
+```rust
+fn create_container() -> SliceContainer {
+  let data = [0xFF; 12]; // small array of bytes the stack
+
+  SliceContainer {
+    bytes: &data[..] // reference to slice of `data`
+  }
+}
+```
+
+When `create_container()` returns, the reference to the slice inside `SliceContainer` is invalidated (`data` is deallocated from the stack). Let's see how Rust solves this at compile time.
 
 # Ownership - Lifetime of a borrow
 
@@ -258,6 +273,23 @@ impl<'a> SliceContainer<'a> {
 Rust will track the lifetime of any variables used in `SliceContainer` and ensure they live long enough (not dropped before `SliceContainer`'s lifetime `'a`).
 
 The lifetime name is not important, it can be almost anything for example `'bytes`, but typically it is a single letter.
+
+# Ownership - Lifetime of a borrow
+
+Compiling the `create_container()` function again yeilds the following error message.
+
+```rust
+error[E0515]: cannot return value referencing local variable `data`
+  --> src/main.rs:20:3
+   |
+20 | /   SliceContainer {
+21 | |     bytes: &data[..] // reference to slice of `data`
+   | |             ---- `data` is borrowed here
+22 | |   }
+   | |___^ returns a value referencing data owned by the current function
+
+For more information about this error, try `rustc --explain E0515`.
+```
 
 # Enumerations - C like
 
