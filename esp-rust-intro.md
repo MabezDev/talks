@@ -259,6 +259,76 @@ Rust will track the lifetime of any variables used in `SliceContainer` and ensur
 
 The lifetime name is not important, it can be almost anything for example `'bytes`, but typically it is a single letter.
 
+# Enumerations - C like
+
+Rust’s enums are most similar to algebraic data types in functional languages, such as F#, OCaml, and Haskell but can also be C like too.
+
+```rust
+enum Chip { // C like enum
+  Esp32,
+  Esp32c3,
+  Esp8266
+}
+```
+
+```rust
+enum Chip { // C like enum with values
+  Esp32 = 123,
+  Esp32c3 = 555,
+  Esp8266 = 999
+}
+```
+
+```rust
+// Example usage
+let c3 = Chip::Esp32c3;
+```
+
+# Enumerations - Algerbraic
+```rust
+enum Chip {
+  Esp32 { revision: u8 }, // named field
+  Esp32c3,
+  Esp8266
+}
+```
+
+```rust
+enum Chip {
+  Esp32(u8), // anonymous field
+  Esp32c3,
+  Esp8266
+}
+```
+
+```rust
+// Example usage
+let esp32r0 = Chip::Esp32 { revision: 0 };
+```
+
+# Enumerations - C like matching
+
+```rust
+let chip = Chip::Esp32c3;
+match chip {
+  Chip::Esp32c3 => println!("It's a C3 yay!"),
+  other => println!("It's a {:?}!", other),
+}
+```
+
+# Enumerations - Algerbraic matching
+
+```rust
+let esp32 = Chip::Esp32 { revision: 0 };
+match esp32 {
+  // matching with fixed constants
+  Chip::Esp32 { revision: 0 } => println!("It's a revision esp32r0! You're old school."),
+  // matching with variable bindings
+  Chip::Esp32 { revision } => println!("It's a esp32r{}!", revision),
+  // wildcard
+  _ => panic!("Not an esp32!"),
+}
+```
 
 # Links
 
