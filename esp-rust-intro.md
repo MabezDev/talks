@@ -545,9 +545,25 @@ impl<T> Cage<T>
 ```
 Feel free to play with this example in [the playground](https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=d6495300aabbb0c1fc60e6ebfe09f407).
 
+# Miscellaneous - `std` vs `no_std`
+
+The Rust Core Library is the dependency-free foundation of The Rust Standard Library. The core library is minimal: it isn’t even aware of heap allocation, nor does it provide concurrency or I/O. These things require platform integration, and this library is platform-agnostic.
+
+# Miscellaneous - Cargo plugins
+
+By naming a package binary `cargo-X` you can extend the capabilities of cargo. For example, `cargo-espflash` can be invoked with `cargo espflash OPTIONS`. [Other examples](https://crates.io/categories/development-tools::cargo-plugins). 
+
+[`cargo-edit`](https://github.com/killercup/cargo-edit) is one such tool, and allows the addition, removal and upgrade of dependencies in the projects `Cargo.toml` via the command line.
+
+
+# Thanks for listening!
+<!-- _class: lead -->
+## Questions?
+
 # Links
 
-- [esp-idf](https://github.com/espressif/esp-idf)
+- ["the book"](https://doc.rust-lang.org/book/)
 - [The esp book](https://esp-rs.github.io/book/)
 - [esp-rs organisation](https://github.com/esp-rs)
 - [esp-rs roadmap](https://github.com/orgs/esp-rs/projects/1)
+- [rust embedded book](https://docs.rust-embedded.org/book/)
