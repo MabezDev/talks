@@ -357,8 +357,60 @@ match esp32 {
   Chip::Esp32 { revision: 0 } => println!("It's a revision esp32r0! You're old school."),
   // matching with variable bindings
   Chip::Esp32 { revision } => println!("It's a esp32r{}!", revision),
-  // wildcard
+  // wildcard catch all
   _ => panic!("Not an esp32!"),
+}
+```
+
+# Error handling - Unrecoverable
+
+```rust
+panic!("Oh no!");
+```
+```rust
+let reason = "Cosmic Ray";
+panic!("Panic reason: {}", reason);
+```
+
+# Error handling - Result type
+
+```rust
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+```
+
+```rust
+let possible_err: Result<&str, &str> = Ok("All good!")
+let assume_okay_or_panic = possible_err.unwrap();
+```
+
+```rust
+let possible_err: Result<&str, &str> = Err("Oops, there was an error")
+let assume_okay_or_panic = possible_err.unwrap(); // panic here
+```
+
+# Error handling
+
+```rust
+enum Error {
+  Checksum
+}
+
+pub fn read_u32_from_device() -> Result<u32, Error>
+```
+```rust
+for _ in 0..100 {
+  match read_u32_from_device() {
+   Ok(data) => {
+     num_samples += 1;
+     println!("Received: 0x{:04X}", data);
+   },
+   Err(e) => {
+     println!("{:?} error occured, but it's okay! Lets keep going!", e)
+   }
+  }
 }
 ```
 
