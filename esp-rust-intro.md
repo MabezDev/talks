@@ -401,18 +401,149 @@ enum Error {
 pub fn read_u32_from_device() -> Result<u32, Error>
 ```
 ```rust
+let mut num_samples = 0;
 for _ in 0..100 {
   match read_u32_from_device() {
    Ok(data) => {
      num_samples += 1;
      println!("Received: 0x{:04X}", data);
    },
-   Err(e) => {
-     println!("{:?} error occured, but it's okay! Lets keep going!", e)
-   }
+   Err(e) => println!("{:?} error occured, but it's okay! Lets keep going!", e),
   }
 }
 ```
+
+# Generics
+
+We've already seen some generics throughout these slides, a generic enum `Result<T, E>` and `Vec<T>` a homogeneous collection. They are a core part of Rust's tools for reducing code duplication.
+
+Generic type parameters (usually denoted by a single letter) are placeholders for a _concrete_ type.
+
+# Generics
+
+Lets look at the definition of another important enum, `Option`. `Option` is a replacement for null, and represents a sitation where a value may or may not exists during runtime.
+```rust
+enum Option<T> {
+    Some(T),
+    None,
+}
+```
+`Option`'s generic type `T` can be filled with any concrete type we like for example
+```rust
+let x: Option<u32> = Some(0); // optional u32
+```
+```rust
+struct CustomItem;
+
+let x: Option<CustomItem> = None; // optional CustomItem
+```
+
+# Generics - Traits
+
+Traits are Rust's way of defining shared behaviour. They are similiar to what other languages might call interfaces. Lets define our first trait.
+```rust
+pub trait Animal {
+  fn eat(&self, t: Treat);
+}
+```
+and some `struct`'s that we want to implement the trait for.
+```rust
+struct Cat;
+struct Dog;
+```
+and we can't forget a treat for them!
+```rust
+struct Treat;
+```
+
+# Generics - Traits
+
+Lets implement `Animal` for our structs.
+```rust
+impl Animal for Cat {
+  fn eat(&self, _t: Treat) {
+    println!("Meow!") // cat for tasty
+  }
+}
+```
+```rust
+impl Animal for Dog {
+  fn eat(&self, _t: Treat) {
+    println!("Woof!") // dog for yummy
+  }
+}
+```
+
+# Generics - Traits
+
+Now lets make a cage to hold animals. We'll add a treat dispensing method too.
+
+```rust
+struct Cage<T>{
+  animal: T,
+}
+
+impl<T> Cage<T> {
+  pub fn new(animal: T) -> Self {
+    Self { animal: animal }
+  }
+  pub fn dispsense_treat(&self) {
+    let t = Treat;
+    self.animal.eat(t)
+  }
+}
+```
+
+# Generics - Traits
+
+```rust
+fn main() {
+  let mia = Dog;
+  let cage = Cage {
+    animal: mia,
+  };
+
+  cage.dispsense_treat();
+}
+// should print "Woof!"
+```
+Easy, right? Not quite! Rust will fail to compile this because is doesn't know that whatever the concrete type `T` is filled in with implements `Animal`.
+
+# Generics - Traits
+
+What stops us from putting something that does not have `Animal` traits into the cage? Nothing right now, we could put whatever we like in here, like a wild `u32`.
+
+```rust
+let cage = Cage {
+  animal: 0u32
+}
+
+cage.dispsense_treat();
+// what should this print???
+```
+
+We need some _trait bounds_ on our `Cage`.
+
+# Generics - Traits
+
+```rust
+struct Cage<T>{
+  animal: T,
+}
+
+impl<T> Cage<T> 
+  where T: Animal
+{
+  pub fn new(animal: T) -> Self {
+    Self { animal: animal }
+  }
+  pub fn dispsense_treat(&self) {
+    let t = Treat;
+    self.animal.eat(t)
+  }
+}
+```
+Feel free to play with this example in [the playground](https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=d6495300aabbb0c1fc60e6ebfe09f407).
 
 # Links
 
