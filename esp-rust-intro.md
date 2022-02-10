@@ -18,7 +18,7 @@ headingDivider: 1
 
 - Eliminates a whole class of memory and syncronization bugs at compile time
 - Imperative language, but with functional elements
-- Package management with Cargo, and a rich ecosystem of crates
+- Package management with Cargo, with a rich ecosystem of crates
 
 # What is a crate?
 
@@ -31,7 +31,7 @@ headingDivider: 1
 
 - Manages the download and compilation of crates in a project
 - Default repository is [crates.io](https://crates.io/), but allows custom repositories
-- Functionality can be extended
+- Functionality can be extended with plugins (more on this later)
 
 # How a Rust project is structured
 
