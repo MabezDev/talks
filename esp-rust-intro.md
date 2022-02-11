@@ -13,6 +13,7 @@ headingDivider: 1
 - Rust is a systems programming language with the slogan "fast, reliable, productive: pick three."
 - 1.0 release back in 2015
 - 6 week release cycle
+- Previously governed by Mozilla, but is now managed by an independent non-profit organization, the Rust Foundation. 
 
 # Why Rust?
 
@@ -29,7 +30,10 @@ headingDivider: 1
 
 # Cargo
 
-- Manages the download and compilation of crates in a project
+- Manages the 
+  - Download and compilation of crates in a project
+  - Documentation generation for the project
+  - Running of tests
 - Default repository is [crates.io](https://crates.io/), but allows custom repositories
 - Functionality can be extended with plugins (more on this later)
 
@@ -99,15 +103,17 @@ Unlike most programming languages, every variable and reference is immutable by 
 
 ```rust
 let x = 5;
-x = 6; // compile error, x is not mutable 
+x = 6; // compile error, x is not mutable
 ```
-
-To declare something should by mutable, use the `mut` keyword.
-
+It is also possible to redefine or shadow variable names.
+```rust
+let x = 5;
+let x = 6; // x is 6
+```
+To declare something that should by mutable, use the `mut` keyword.
 ```rust
 let mut x = 5;
-x = 6;
-// x is now 6
+x = 6; // x is now 6
 ```
 
 # Ownership
@@ -152,17 +158,18 @@ error: could not compile `ownership` due to previous error
 
 # Ownership - `Copy` types
 
-The error on the previous slide talks about a type not being `Copy`. Simply put, if an `struct` or `enum` is `Copy`, it means it's safe to do a bitwise memcopy to duplicate the value.
+The error on the previous slide talks about a type not implementing the `Copy` trait (more on traits later!). Simply put, if an `struct` or `enum` implements the `Copy` trait, it means it's safe to do a bitwise memcopy to duplicate the value.
 
 Example of a `Copy` type are integers.
 
 ```rust
 let x = 5; // x owns the integer with value of 5
-let y = x; // integer is copy, so x is copied bit for bit into y
+let y = x; // integer is `Copy`, so x is copied bit for bit into y
 ```
 
 ```rust
 println!("(x,y) = ({},{})", x,y); // compiles fine
+// prints (x,y) = (5,5)
 ```
 
 # Ownership - `Copy` types
@@ -181,7 +188,7 @@ We can see we have a pointer to some memory (on the heap), and a capacity. If we
 
 # Ownership  - `Clone`
 
-For us to duplicate a `String` we'd need some special behavior. This is where `Clone` comes in. `Clone` is a trait (more on those later!) that allows us to define what to do when we want to duplicate a `struct` or `enum`.
+For us to duplicate a `String` we'd need some special behavior. This is where `Clone` comes in. `Clone` is a trait like `Copy` that allows us to define what to do when we want to duplicate a `struct` or `enum` that is not `Copy`.
 
 The `Clone` implementation for a `String` allocates _new_ memory on the heap with the same capacity, copies the bytes from the current allocation into the new memory and finally returns the new `String`.
 
@@ -221,6 +228,40 @@ fn change(some_string: &mut String) {
     some_string.push_str(", world");
 }
 ```
+
+# Ownership - Mutable borrowing
+
+The most important rule about mutable borrowing is that to borrow mutably, there must be no other references (mutable or immutable) to the thing you are trying to borrow.
+
+```rust
+let mut owned: String = "hi".to_owned();
+let mut_borrow = &mut owned; // mutable borrow starts here
+let borrow = &owned; // can't borrow again whilst a mutable borrow exists!
+mut_borrow.push_str("!!!"); // mutable borrow lives till here
+```
+
+# Ownership - Mutable borrowing
+
+Fortunately we don't have to track this, Rust is kind enough to tell us if we try and borrow again with a friendly compile error.
+
+```rust
+error[E0502]: cannot borrow `owned` as immutable because it is also borrowed as mutable
+  --> src/main.rs:9:19
+   |
+7  |     let mut_borrow = &mut owned;
+   |                      ---------- mutable borrow occurs here
+8  |     
+9  |     let _borrow = &owned;
+   |                   ^^^^^^ immutable borrow occurs here
+10 |     
+11 |     mut_borrow.push_str("!!!");
+   |     -------------------------- mutable borrow later used here
+
+For more information about this error, try `rustc --explain E0502`.
+error: could not compile `playground` due to previous error
+```
+
+Feel free to play around with the ordering of statements and scope in [the playground](https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=ccbe01fecc91ecd4a091e613f6e42a9a).
 
 # Ownership - Lifetime of a borrow
 
@@ -316,7 +357,7 @@ enum Chip { // C like enum with values
 let c3 = Chip::Esp32c3;
 ```
 
-# Enumerations - Algerbraic
+# Enumerations - Algebraic
 ```rust
 enum Chip {
   Esp32 { revision: u8 }, // named field
@@ -348,7 +389,7 @@ match chip {
 }
 ```
 
-# Enumerations - Algerbraic matching
+# Enumerations - Algebraic matching
 
 ```rust
 let esp32 = Chip::Esp32 { revision: 0 };
@@ -487,7 +528,7 @@ impl<T> Cage<T> {
   pub fn new(animal: T) -> Self {
     Self { animal: animal }
   }
-  pub fn dispsense_treat(&self) {
+  pub fn dispense_treat(&self) {
     let t = Treat;
     self.animal.eat(t)
   }
@@ -503,7 +544,7 @@ fn main() {
     animal: mia,
   };
 
-  cage.dispsense_treat();
+  cage.dispense_treat();
 }
 // should print "Woof!"
 ```
@@ -518,7 +559,7 @@ let cage = Cage {
   animal: 0u32
 }
 
-cage.dispsense_treat();
+cage.dispense_treat();
 // what should this print???
 ```
 
@@ -532,12 +573,12 @@ struct Cage<T>{
 }
 
 impl<T> Cage<T> 
-  where T: Animal
+  where T: Animal // <--- this is the important bit!
 {
   pub fn new(animal: T) -> Self {
     Self { animal: animal }
   }
-  pub fn dispsense_treat(&self) {
+  pub fn dispense_treat(&self) {
     let t = Treat;
     self.animal.eat(t)
   }
