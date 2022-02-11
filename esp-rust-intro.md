@@ -21,6 +21,9 @@ headingDivider: 1
 - Imperative language, but with functional elements
 - Package management with Cargo, with a rich ecosystem of crates
 
+# Terminology and basic tooling
+<!-- _class: lead -->
+
 # What is a crate?
 
 - Synonymous with a library/project
@@ -35,7 +38,24 @@ headingDivider: 1
   - Documentation generation for the project
   - Running of tests
 - Default repository is [crates.io](https://crates.io/), but allows custom repositories
+  - It's also possible to use git or path dependencies which is very useful for development
 - Functionality can be extended with plugins (more on this later)
+
+# Using a external library
+
+For example, adding `serde` to our application.
+
+```toml
+# Cargo.toml
+[dependencies]
+serde = "1.0.136"
+```
+Then to use it.
+```rust
+//! main.rs
+use serde;
+```
+![bg right 92%](assets/1644241060.png)
 
 # How a Rust project is structured
 
@@ -78,22 +98,6 @@ fn main() {
 }
 ```
 
-# Using a external library
-
-For example, adding `serde` to our application.
-
-```toml
-# Cargo.toml
-[dependencies]
-serde = "1.0.136"
-```
-Then to use it.
-```rust
-//! main.rs
-use serde;
-```
-![bg right 92%](assets/1644241060.png)
-
 # Writing Rust code
 <!-- _class: lead -->
 
@@ -107,10 +111,10 @@ x = 6; // compile error, x is not mutable
 ```
 It is also possible to redefine or shadow variable names.
 ```rust
-let x = 5;
+let x = 5; // x is 5
 let x = 6; // x is 6
 ```
-To declare something that should by mutable, use the `mut` keyword.
+To declare something that should be mutable, use the `mut` keyword.
 ```rust
 let mut x = 5;
 x = 6; // x is now 6
@@ -119,7 +123,7 @@ x = 6; // x is now 6
 # Ownership
 
 - Fundamental set of rules that governs how a Rust program manages memory.
-- Applies to both stack and heap.
+- Applies to both stack _and_ heap memory.
 
 # Ownership
 
@@ -133,7 +137,7 @@ The three ownership rules:
 
 ```rust
 let s1 = String::from("hello"); // s1 owns the string
-let s2 = s1; // s1 transfers ownership to s2, leaving s1 empty
+let s2 = s1; // s1 transfers ownership (moves) to s2, leaving s1 empty
 ```
 
 ```rust
@@ -462,7 +466,7 @@ Generic type parameters (usually denoted by a single letter) are placeholders fo
 
 # Generics
 
-Lets look at the definition of another important enum, `Option`. `Option` is a replacement for null, and represents a sitation where a value may or may not exists during runtime.
+Lets look at the definition of another important enum, `Option`. `Option` is a replacement for null, and represents a situation where a value may or may not exists during runtime.
 ```rust
 enum Option<T> {
     Some(T),
@@ -590,6 +594,10 @@ Feel free to play with this example in [the playground](https://play.rust-lang.o
 
 The Rust Core Library is the dependency-free foundation of The Rust Standard Library. The core library is minimal: it isn’t even aware of heap allocation, nor does it provide concurrency or I/O. These things require platform integration, and this library is platform-agnostic.
 
+Even though the Core library is not aware of heap allocation, it's still possible to do heap allocation in a `no_std` environment. Much like the Core library and Standard library, the Alloc library is also seperate and can be pulled into a `no_std` project.
+
+The Standard library builds on top of Core and Alloc, often re-exporting large parts of each crate.
+
 # Miscellaneous - Cargo plugins
 
 By naming a package binary `cargo-X` you can extend the capabilities of cargo. For example, `cargo-espflash` can be invoked with `cargo espflash OPTIONS`. [Other examples](https://crates.io/categories/development-tools::cargo-plugins). 
@@ -601,9 +609,11 @@ By naming a package binary `cargo-X` you can extend the capabilities of cargo. F
 <!-- _class: lead -->
 ## Questions?
 
-# Links
+# Links & Resources
 
 - ["the book"](https://doc.rust-lang.org/book/)
+- [rust-by-example](https://doc.rust-lang.org/rust-by-example/)
+- [rustlings](https://github.com/rust-lang/rustlings)
 - [The esp book](https://esp-rs.github.io/book/)
 - [esp-rs organisation](https://github.com/esp-rs)
 - [esp-rs roadmap](https://github.com/orgs/esp-rs/projects/1)
