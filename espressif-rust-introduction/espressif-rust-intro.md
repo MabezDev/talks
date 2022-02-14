@@ -71,11 +71,6 @@ use serde;
 │       └── multi-file-executable/
 │           ├── main.rs
 │           └── some_module.rs
-├── benches/
-│   ├── large-input.rs
-│   └── multi-file-bench/
-│       ├── main.rs
-│       └── bench_module.rs
 ├── examples/
 │   ├── simple.rs
 │   └── multi-file-example/
@@ -101,6 +96,131 @@ fn main() {
 # Writing Rust code
 <!-- _class: lead -->
 
+# Enumerations - C like
+
+Rust’s enums are most similar to algebraic data types in functional languages, such as F#, OCaml, and Haskell but can also be C like too.
+
+```rust
+enum Chip { // C like enum
+  Esp32,
+  Esp32c3,
+  Esp8266
+}
+```
+
+```rust
+enum Chip { // C like enum with values
+  Esp32 = 123,
+  Esp32c3 = 555,
+  Esp8266 = 999
+}
+```
+
+```rust
+let c3 = Chip::Esp32c3; // Example usage
+```
+
+# Enumerations - Algebraic
+```rust
+enum Chip {
+  Esp32 { revision: u8 }, // named field
+  Esp32c3,
+  Esp8266
+}
+```
+
+```rust
+enum Chip {
+  Esp32(u8), // anonymous field
+  Esp32c3,
+  Esp8266
+}
+```
+
+```rust
+// Example usage
+let esp32r0 = Chip::Esp32 { revision: 0 };
+```
+
+# Enumerations - C like matching
+
+```rust
+let chip = Chip::Esp32c3;
+match chip {
+  Chip::Esp32c3 => println!("It's a C3 yay!"),
+  other => println!("It's a {:?}!", other),
+}
+```
+
+# Enumerations - Algebraic matching
+
+```rust
+let esp32 = Chip::Esp32 { revision: 0 };
+match esp32 {
+  // matching with fixed constants
+  Chip::Esp32 { revision: 0 } => println!("It's a revision esp32r0! You're old school."),
+  // matching with variable bindings
+  Chip::Esp32 { revision } => println!("It's a esp32r{}!", revision),
+  // wildcard catch all
+  _ => panic!("Not an esp32!"),
+}
+```
+
+[playground link](https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=f781b440f1bd3deda868bcc9e50b247c)
+
+# Error handling - Unrecoverable
+
+```rust
+panic!("Oh no!");
+```
+```rust
+let reason = "Cosmic Ray";
+panic!("Panic reason: {}", reason);
+```
+
+# Error handling - Result type
+
+```rust
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+```
+
+```rust
+let possible_err: Result<&str, &str> = Ok("All good!");
+let assume_okay_or_panic = possible_err.unwrap();
+```
+
+```rust
+let possible_err: Result<&str, &str> = Err("Oops, there was an error");
+let assume_okay_or_panic = possible_err.unwrap(); // panic here
+```
+
+# Error handling
+
+```rust
+enum Error {
+  Checksum
+}
+
+pub fn read_u32_from_device() -> Result<u32, Error>
+```
+```rust
+let mut num_samples = 0;
+for _ in 0..100 {
+  match read_u32_from_device() {
+   Ok(data) => {
+     num_samples += 1;
+     println!("Received: 0x{:04X}", data);
+   },
+   Err(e) => println!("{:?} error occured, but it's okay! Lets keep going!", e),
+  }
+}
+```
+
+[playground link](https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=52f6eb74138800787bfe8e70169d2c0d)
+
 # Mutability
 
 Unlike most programming languages, every variable and reference is immutable by default.
@@ -119,6 +239,10 @@ To declare something that should be mutable, use the `mut` keyword.
 let mut x = 5;
 x = 6; // x is now 6
 ```
+
+# Ownership & Lifetimes
+
+![bg 70%](assets/1644838848.png)
 
 # Ownership
 
@@ -192,7 +316,7 @@ We can see we have a pointer to some memory (on the heap), and a capacity. If we
 
 # Ownership  - `Clone`
 
-For us to duplicate a `String` we'd need some special behavior. This is where `Clone` comes in. `Clone` is a trait like `Copy` that allows us to define what to do when we want to duplicate a `struct` or `enum` that is not `Copy`.
+To duplicate a `String` we'd need some special behavior. This is where `Clone` comes in. `Clone` is a trait like `Copy` that allows us to define what to do when we want to duplicate a `struct` or `enum` that is not `Copy`.
 
 The `Clone` implementation for a `String` allocates _new_ memory on the heap with the same capacity, copies the bytes from the current allocation into the new memory and finally returns the new `String`.
 
@@ -240,7 +364,9 @@ The most important rule about mutable borrowing is that to borrow mutably, there
 ```rust
 let mut owned: String = "hi".to_owned();
 let mut_borrow = &mut owned; // mutable borrow starts here
+
 let borrow = &owned; // can't borrow again whilst a mutable borrow exists!
+
 mut_borrow.push_str("!!!"); // mutable borrow lives till here
 ```
 
@@ -336,127 +462,7 @@ error[E0515]: cannot return value referencing local variable `data`
 For more information about this error, try `rustc --explain E0515`.
 ```
 
-# Enumerations - C like
-
-Rust’s enums are most similar to algebraic data types in functional languages, such as F#, OCaml, and Haskell but can also be C like too.
-
-```rust
-enum Chip { // C like enum
-  Esp32,
-  Esp32c3,
-  Esp8266
-}
-```
-
-```rust
-enum Chip { // C like enum with values
-  Esp32 = 123,
-  Esp32c3 = 555,
-  Esp8266 = 999
-}
-```
-
-```rust
-// Example usage
-let c3 = Chip::Esp32c3;
-```
-
-# Enumerations - Algebraic
-```rust
-enum Chip {
-  Esp32 { revision: u8 }, // named field
-  Esp32c3,
-  Esp8266
-}
-```
-
-```rust
-enum Chip {
-  Esp32(u8), // anonymous field
-  Esp32c3,
-  Esp8266
-}
-```
-
-```rust
-// Example usage
-let esp32r0 = Chip::Esp32 { revision: 0 };
-```
-
-# Enumerations - C like matching
-
-```rust
-let chip = Chip::Esp32c3;
-match chip {
-  Chip::Esp32c3 => println!("It's a C3 yay!"),
-  other => println!("It's a {:?}!", other),
-}
-```
-
-# Enumerations - Algebraic matching
-
-```rust
-let esp32 = Chip::Esp32 { revision: 0 };
-match esp32 {
-  // matching with fixed constants
-  Chip::Esp32 { revision: 0 } => println!("It's a revision esp32r0! You're old school."),
-  // matching with variable bindings
-  Chip::Esp32 { revision } => println!("It's a esp32r{}!", revision),
-  // wildcard catch all
-  _ => panic!("Not an esp32!"),
-}
-```
-
-# Error handling - Unrecoverable
-
-```rust
-panic!("Oh no!");
-```
-```rust
-let reason = "Cosmic Ray";
-panic!("Panic reason: {}", reason);
-```
-
-# Error handling - Result type
-
-```rust
-enum Result<T, E> {
-    Ok(T),
-    Err(E),
-}
-```
-
-```rust
-let possible_err: Result<&str, &str> = Ok("All good!")
-let assume_okay_or_panic = possible_err.unwrap();
-```
-
-```rust
-let possible_err: Result<&str, &str> = Err("Oops, there was an error")
-let assume_okay_or_panic = possible_err.unwrap(); // panic here
-```
-
-# Error handling
-
-```rust
-enum Error {
-  Checksum
-}
-
-pub fn read_u32_from_device() -> Result<u32, Error>
-```
-```rust
-let mut num_samples = 0;
-for _ in 0..100 {
-  match read_u32_from_device() {
-   Ok(data) => {
-     num_samples += 1;
-     println!("Received: 0x{:04X}", data);
-   },
-   Err(e) => println!("{:?} error occured, but it's okay! Lets keep going!", e),
-  }
-}
-```
+[playground link](https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=18131ed7e551475014b0ce5cf20459ff)
 
 # Generics
 
@@ -611,10 +617,11 @@ By naming a package binary `cargo-X` you can extend the capabilities of cargo. F
 
 # Links & Resources
 
-- ["the book"](https://doc.rust-lang.org/book/)
+- ["the book"](https://doc.rust-lang.org/book/) -  Official Rust learning book
 - [rust-by-example](https://doc.rust-lang.org/rust-by-example/)
 - [rustlings](https://github.com/rust-lang/rustlings)
-- [The esp book](https://esp-rs.github.io/book/)
+- [The esp book](https://esp-rs.github.io/book/) - Rust on Espressif chips
 - [esp-rs organisation](https://github.com/esp-rs)
 - [esp-rs roadmap](https://github.com/orgs/esp-rs/projects/1)
 - [rust embedded book](https://docs.rust-embedded.org/book/)
+- [gitpod.io/rust](https://www.gitpod.io/docs/languages/rust) - Quickstart rust environment in the browser
