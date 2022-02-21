@@ -17,9 +17,12 @@ headingDivider: 1
 
 # Why Rust?
 
+- It's fast, compiling down to machine code just like C
 - Eliminates a whole class of memory and syncronization bugs at compile time
-- Imperative language, but with functional elements
-- Package management with Cargo, with a rich ecosystem of crates
+  - In 2019 Microsoft announced that over 70% of CVEs in the last 12 years related to their system level software (written in C or C++) were memory safety bugs.
+- Package management with `cargo`
+  - Similar to esp-idf component manager, but supporting the entire language.
+- Imperative language, but with strong functional elements
 
 # Terminology and basic tooling
 <!-- _class: lead -->
@@ -569,9 +572,7 @@ impl<T> Cage<T> {
 ```rust
 fn main() {
   let mia = Dog;
-  let cage = Cage {
-    animal: mia,
-  };
+  let cage = Cage::new(mia);
 
   cage.dispense_treat();
 }
@@ -584,9 +585,8 @@ Easy, right? Not quite! Rust will fail to compile this because is doesn't know t
 In that same line of thinking, what stops us from putting something that does not have `Animal` traits into the cage? Right now we could put whatever we like in here, like a wild `u32`.
 
 ```rust
-let cage = Cage {
-  animal: 0u32
-}
+let nibble = 0u32; // ah, our beloved pet u32, nibble!
+let cage = Cage::new(nibble);
 
 cage.dispense_treat();
 // what should this print???
@@ -613,7 +613,7 @@ impl<T> Cage<T>
   }
 }
 ```
-Feel free to play with this example in [the playground](https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=d6495300aabbb0c1fc60e6ebfe09f407).
+Feel free to play with this example in [the playground](https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=52af7070f13581f7730ec2df4bb674b0).
 
 # Miscellaneous - `std` vs `no_std`
 
