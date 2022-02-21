@@ -240,6 +240,25 @@ let mut x = 5;
 x = 6; // x is now 6
 ```
 
+# `return` in Rust
+
+Everything in Rust is an expression, its typical to not use the `return` keyword, unless returning early.
+
+```rust
+fn new(seed: u32) -> Result<u32, &'static str> {
+  if seed == 0 {
+    return Err("Seed can't be zero"); // early return here
+  }
+
+  // important to note there is a missing semicolon, adding a semicolon
+  // would make that line of code a statement. (which makes this example fail to compile)
+  // Equivilent to `return Ok(seed);`
+  Ok(seed) 
+}
+```
+
+[Playground link with more examples](https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=01d13088b69428380f75df52fe3c8708)
+
 # Ownership & Lifetimes
 
 ![bg 70%](assets/1644838848.png)
@@ -556,13 +575,13 @@ fn main() {
 
   cage.dispense_treat();
 }
-// should print "Woof!"
+// _should_ print "Woof!"
 ```
 Easy, right? Not quite! Rust will fail to compile this because is doesn't know that whatever the concrete type `T` is filled in with implements `Animal`.
 
 # Generics - Traits
 
-What stops us from putting something that does not have `Animal` traits into the cage? Nothing right now, we could put whatever we like in here, like a wild `u32`.
+In that same line of thinking, what stops us from putting something that does not have `Animal` traits into the cage? Right now we could put whatever we like in here, like a wild `u32`.
 
 ```rust
 let cage = Cage {
