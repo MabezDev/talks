@@ -18,6 +18,7 @@ headingDivider: 1
 # Why Rust?
 
 - It's fast, compiling down to machine code just like C
+  - Memory is deallocated as it goes out of scope, no garbage collection required.
 - Eliminates a whole class of memory and syncronization bugs at compile time
   - In 2019 Microsoft announced that over 70% of CVEs in the last 12 years related to their system level software (written in C or C++) were memory safety bugs.
 - Package management with `cargo`
@@ -123,6 +124,16 @@ enum Chip { // C like enum with values
 let c3 = Chip::Esp32c3; // Example usage
 ```
 
+# Enumerations - C like matching
+
+```rust
+let chip = Chip::Esp32c3;
+match chip {
+  Chip::Esp32c3 => println!("It's a C3 yay!"),
+  other => println!("It's a {:?}!", other),
+}
+```
+
 # Enumerations - Algebraic
 ```rust
 enum Chip {
@@ -143,16 +154,6 @@ enum Chip {
 ```rust
 // Example usage
 let esp32r0 = Chip::Esp32 { revision: 0 };
-```
-
-# Enumerations - C like matching
-
-```rust
-let chip = Chip::Esp32c3;
-match chip {
-  Chip::Esp32c3 => println!("It's a C3 yay!"),
-  other => println!("It's a {:?}!", other),
-}
 ```
 
 # Enumerations - Algebraic matching
@@ -324,7 +325,7 @@ println!("(x,y) = ({},{})", x,y); // compiles fine
 
 # Ownership - `Copy` types
 
-Why is `String` not copy? Well a `String` is just a `Vec` but with the guarentee that all the bytes inside are valid UTF8. Let's look at the memory layout of `Vec`.
+Why is `String` not copy? Well a `String` is just a `Vec` but with the guarantee that all the bytes inside are valid UTF8. Let's look at the memory layout of `Vec`.
 
 ```rust
 struct Vec<T> {
@@ -469,7 +470,7 @@ The lifetime name is not important, it can be almost anything for example `'byte
 
 # Ownership - Lifetime of a borrow
 
-Compiling the `create_container()` function again yeilds the following error message.
+Compiling the `create_container()` function again yields the following error message.
 
 ```rust
 error[E0515]: cannot return value referencing local variable `data`
