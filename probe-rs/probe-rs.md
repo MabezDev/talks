@@ -49,17 +49,21 @@ All the tools from the previous slide share one core library, `probe-rs`. This l
 # Demo
 <!-- _class: lead -->
 
-# Tips & Tricks
-
-- Want to try replacing openOCD in your workflow? Run `probe-rs-cli gdb --protocol jtag --chip esp32c3`. Note the default port is `1337`, instead of openOCD's `3333`
-
-- If you have multiple probes connected you can specify via USB PID/VID (and serial number too, if you have two of the same probe) with the `--probe` argument.
-
 # Limitations
 
 - No Xtensa support currently - I started working on this [last summer](https://github.com/MabezDev/probe-rs/commits/xtensa) but don't have time to work on this at the moment.
 - Due to the binary format required by the ROM and second-stage bootloaders of esp32's, probe-rs only knows how to flash direct boot applications
 
+# Teleprobe
+
+[teleprobe](https://github.com/embassy-rs/teleprobe) is a toolkit for debugging and testing remote targets. Could be useful for HIL testing with probe-rs.
+
 # Hive
 
 [Hive](https://github.com/probe-rs/hive) Is an experimental shield stack for a raspberry Pi, which leverages `probe-rs` for doing HIL with up to 8 devices.
+
+# Tips & Tricks
+
+- Want to try replacing openOCD in your workflow? Run `probe-rs-cli gdb --protocol jtag --chip esp32c3`. Note the default port is `1337`, instead of openOCD's `3333`
+
+- If you have multiple probes connected you can specify via USB PID/VID (and serial number too, if you have two of the same probe) with the `--probe` argument.
