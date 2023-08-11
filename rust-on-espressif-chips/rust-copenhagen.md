@@ -10,53 +10,67 @@ headingDivider: 1
 
 # What I'll cover today
 
-- Why Rust at Espressif?
+- What is embedded?
 - Why Rust for embedded?
-- What we offer currently
 - `async` + embedded Rust
 
-# Espressif
+# What is embedded?
 
-First some background on Espressif
+- A system created with a specific purpose
+- Usually has some real-time computing and resource constraints
 
-# Our chips line-up
+<!-- SPEAKER NOTES 
+  - Examples:
+    - A electronic door lock
+    - A temperature data logger, applications like agriculture uses
+-->
+# What do we mean by real-time?
 
-<!-- What we provide -->
+- Reacting to system events with as little latency as possible
 
-# esp-idf
+# Resource constraints
 
-<!-- TODO Familiarise the audience with the C SDK -->
+- Kilobytes of RAM, instead of Gigabytes found on modern computers
+- 10's of Megahertz CPU frequencies, instead of the Gigahertz frequencies and multiple cores on modern computers
+<!-- esp32 with a few hundred K of RAM, and a few MB of flash to store our program(s) -->
 
-# Espressif & Rust
+# Executing & Debugging programs
 
-<!-- TODO how the journey started -->
-
-# Why Rust at Espressif?
-
-- We see it as an emerging language in the embedded (and tooling) space
-- We expect to be able to write new parts of esp-idf in Rust
-- We expect to rewrite certain parts of esp-idf where Rust's safety guarantees can help
-- Vast & diverse open-source ecosystem
-- Package management
-
-<!-- SPEAKER NOTES
-  - Mention component manager as something we've had to develop to aid users for esp-idf
- -->
+- Program(s) are stored in flash memory
+- They need to be flashed from a host machine
+- Debugging happens remotely
 
 # Why Rust for embedded?
 
 - Memory safety is even more important, most embedded systems do not have an MMU
-- Native `async` support, more on this later
-- Separation of core library & standard library
-- Package management helps foster an open source ecosystem 
+- Ownership: Model physical hardware peripherals as singletons
+
+# Why Rust for embedded
+
+- Package management helps foster an open-source ecosystem
   - Interface trait crates like [`embedded-hal`](https://docs.rs/embedded-hal/latest/embedded_hal/)
   - Non-allocating data structure crates like [`heapless`](https://japaric.github.io/heapless/heapless/index.html)
-  - Loads more, see [awesome-embedded-rust](https://github.com/rust-embedded/awesome-embedded-rust)
 
-<!-- SPEAKER NOTES 
-  - package management to form eco system
- -->
-
-# Tooling
+# Why Rust for embedded - Tooling
 
 <!-- wokwi, probe-rs, espup for Xtensa -->
+
+# Why Rust for embedded - `async`
+
+<!-- benefits of async for both single threaded and applications with threads -->
+
+# `async`
+
+<!-- TODO do I talk about how it works for embedded?? -->
+
+# Espressif's Rust offering
+
+<!-- chip support -->
+<!-- Espressif's chip lineup, WiFi, Bluetooth, 802.15.4 etc as an example -->
+
+<!-- Rust support, STD, no_std -->
+
+# A real-world example
+
+<!-- Show the esp-wifi demo? -->
+<!-- What is possible today -->
