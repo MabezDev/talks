@@ -8,6 +8,13 @@ headingDivider: 1
 # Rust embedded at Espressif
 ## Scott Mabin
 
+<!-- 
+    - intro myself
+    - Rust language enablement team
+    - blog post(s)?
+ -->
+ <!-- TODO add socials -->
+
 # What I'll cover today
 
 - What is an embedded system?
@@ -32,7 +39,6 @@ headingDivider: 1
 - Usually with hard deadlines for response times
 - Typically measured in the order of a few milliseconds
 
-<!-- TODO expand, add context from Linux to an embedded system -->
 
 # Resource constraints
 
@@ -59,10 +65,12 @@ headingDivider: 1
 # Why Rust for embedded - Tooling
 
 - cargo, no more Makefiles!
-- Package management helps foster an open-source ecosystem
+- Package management
   - Interface trait crates like [`embedded-hal`](https://docs.rs/embedded-hal/latest/embedded_hal/)
   - Non-allocating data structure crates like [`heapless`](https://japaric.github.io/heapless/heapless/index.html)
 - probe-rs, a debugging toolkit for embedded devices
+- Wokwi - Simulating embedded systems in the browser
+<!-- define what HAL is -->
 
 # Why Rust for embedded - `async`
 
@@ -103,6 +111,7 @@ A `Waker` is something that can be used to signal that a future should be polled
 
 `wake`ing a `Waker` can happen from anywhere, some examples being a call-back function from a completed operation, just another function or in many embedded cases, an interrupt handler.
 
+<!-- talk about what an interrupt handler is! -->
 
 # How to run futures - Executors
 
@@ -110,7 +119,22 @@ Where do `Poll::Pending` futures yield to? They yield back to the _executor_.
 
 The executor is the mechanism to run futures, it handles the response to a `wake` event and then `poll`'s that future again.
 
+
+# The embassy-executor
+
 A popular executor for embedded is the embassy projects executor.
+
+
+In Embassy, tasks are statically allocated to avoid the need for an allocator. The `#[embassy_executor::task]` macro takes care of this for us.
+
+```rust
+#[embassy_executor::task]
+async fn task() {
+    loop {
+        Timer::after(Duration::from_millis(100)).await;
+    }
+}
+```
 
 # Blocking vs Async
 
@@ -119,15 +143,18 @@ Read the state of a button connected to a pin. Depending on whether the button i
 # Blocking
 
 ```rust
-let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
-let mut led = io.pins.gpio7.into_push_pull_output();
-let button = io.pins.gpio9.into_pull_down_input();
+#[esp_riscv_rt::entry]
+fn main() {
+    let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
+    let mut led = io.pins.gpio7.into_push_pull_output();
+    let button = io.pins.gpio9.into_pull_down_input();
 
-loop {
-    if button.is_high().unwrap() {
-        led.set_high().unwrap();
-    } else {
-        led.set_low().unwrap();
+    loop {
+        if button.is_high() {
+            led.set_high();
+        } else {
+            led.set_low();
+        }
     }
 }
 ```
@@ -135,7 +162,8 @@ loop {
 # Blocking
 
 * Repeatedly checks for a condition to be true before proceeding
-* Simple to implement, very inefficient, 100% CPU usage!
+* Simple program flow
+* Easy to write yet highly inefficient, causing 100% utilization of the CPU.
 
 <!-- TODO add back interrupts example? -->
 
@@ -145,15 +173,15 @@ loop {
 #[embassy_executor::main(entry = "esp_riscv_rt::entry")]
 async fn main(spawner: embassy_executor::Spawner) {
     let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
-    let mut output = io.pins.gpio7.into_push_pull_output();
-    let input = io.pins.gpio9.into_pull_down_input();
+    let mut led = io.pins.gpio7.into_push_pull_output();
+    let button = io.pins.gpio9.into_pull_down_input();
     
     loop {
-        input.wait_for_any_edge().await;
-        if input.is_high() {
-            output.set_high();
+        button.wait_for_any_edge().await;
+        if button.is_high() {
+            led.set_high();
         } else {
-            output.set_low();
+            led.set_low();
         }
     }
 }
