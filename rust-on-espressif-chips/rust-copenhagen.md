@@ -11,9 +11,9 @@ headingDivider: 1
 <!-- 
     - intro myself
     - Rust language enablement team
-    - blog post(s)?
+    - my rust journey, 2018, started with embedded
+    - professionally for 4 years now
  -->
- <!-- TODO add socials -->
 
 # What I'll cover today
 
@@ -89,10 +89,6 @@ You can only `await` something that implements the `Future` trait.
 
 The `Future` trait has one required method, `poll` which returns either `Poll::Ready(_)` if the asynchronous operation is complete, or `Poll::Pending` if it needs to be polled again later.
 
-# `async`'s relationship with `Future`
-
-- `async` functions are compiled down to state machines that implement the  `Future` trait. This is handled completely by the Rust compiler
-
 # When to poll?
 
 You _could_ just `poll` the future in a hot loop, but this is not very efficient and will block other `async` operations from running.
@@ -109,16 +105,11 @@ We'd like to do other things until the `async` operation is ready. This is where
 
 A `Waker` is something that can be used to signal that a future should be polled again.
 
-`wake`ing a `Waker` can happen from anywhere, some examples being a call-back function from a completed operation, just another function or in many embedded cases, an interrupt handler.
+`wake`ing a `Waker` can happen from anywhere, some examples being a call-back function from a completed operation or just another function. 
+
+In many embedded cases, an interrupt handler is used.
 
 <!-- talk about what an interrupt handler is! -->
-
-# How to run futures - Executors
-
-Where do `Poll::Pending` futures yield to? They yield back to the _executor_.
-
-The executor is the mechanism to run futures, it handles the response to a `wake` event and then `poll`'s that future again.
-
 
 # The embassy-executor
 
@@ -136,7 +127,7 @@ async fn task() {
 }
 ```
 
-# Blocking vs Async
+# A trivial embedded scenario
 
 Read the state of a button connected to a pin. Depending on whether the button is pressed, turn on or off an LED connected to another pin.
 
@@ -165,7 +156,52 @@ fn main() {
 * Simple program flow
 * Easy to write yet highly inefficient, causing 100% utilization of the CPU.
 
-<!-- TODO add back interrupts example? -->
+# Interrupt - main
+
+```rust
+static BUTTON: Mutex<RefCell<Option<Gpio9>> = Mutex::new(RefCell::new(None));
+static STATE: AtomicBool = AtomicBool::new(false);
+
+#[esp_riscv_rt::entry]
+fn main() {
+    let mut led = io.pins.gpio7.into_push_pull_output();
+    let mut button = io.pins.gpio9.into_pull_down_input();
+    button.listen(Event::FallingEdge);
+    button.listen(Event::RisingEdge);
+    critical_section::with(|cs| BUTTON.borrow_ref_mut(cs).replace(button));
+
+    loop {
+        if STATE.load(Ordering::SeqCst) {
+            led.set_high();
+        } else {
+            led.set_low();
+        }
+        sleep(); // wait for interrupt here
+    }
+}
+```
+
+# Interrupt - handler
+
+```rust
+#[interrupt]
+fn GPIO() {
+    critical_section::with(|cs| {
+        let button = BUTTON.borrow_ref_mut(cs).as_mut().unwrap();
+        button.clear_interrupt();
+        if button.is_high() {
+            STATE.store(true, Ordering::SeqCst);
+        } else {
+            STATE.store(false, Ordering::SeqCst);
+        }
+    });
+}
+```
+# Interrupt 
+* Hardware signal that interrupts the normal flow of programs execution
+* Allows sleeping in the main thread
+* More code is required, harder to write and read the code
+* Only works for hardware events
 
 # Async
 
@@ -191,6 +227,7 @@ async fn main(spawner: embassy_executor::Spawner) {
 
 - Structurally, it's similar to a `busy loop` but with `async`, each `.await` point allows the CPU to do something else, or even sleep to save power.
 - Uses interrupts behind the scenes but the user doesn't have to worry about setting them up.
+- We can chain hardware driven `async` code with normal async code
 
 # Demo
 
